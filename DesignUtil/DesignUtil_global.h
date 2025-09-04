@@ -1,0 +1,12 @@
+#ifndef DESIGNUTIL_GLOBAL_H
+#define DESIGNUTIL_GLOBAL_H
+
+#include <QtCore/qglobal.h>
+
+#if defined(DESIGNUTIL_LIBRARY)
+#  define DESIGNUTIL_EXPORT Q_DECL_EXPORT
+#else
+#  define DESIGNUTIL_EXPORT Q_DECL_IMPORT
+#endif
+
+#endif // DESIGNUTIL_GLOBAL_H
