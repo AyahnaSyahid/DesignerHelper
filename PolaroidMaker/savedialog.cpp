@@ -56,7 +56,6 @@ void SaveDialog::on_openSave_clicked()
     }
 }
 
-
 void SaveDialog::on_buttonBox_clicked(QAbstractButton *button)
 {
     if(button != ui->buttonBox->button(QDialogButtonBox::Ok)) {
@@ -81,7 +80,6 @@ void SaveDialog::on_buttonBox_clicked(QAbstractButton *button)
     }
 }
 
-
 void SaveDialog::acceptAndClose()
 {
     if(!maker->failReason().isEmpty()) {
@@ -91,21 +89,25 @@ void SaveDialog::acceptAndClose()
         return;
     }
     QMessageBox::information(this, "Info", "Export berhasil");
-    Counter *ctr = new Counter();
-    auto many = maker->pageToCreate();
-    auto hasBonus = ctr->bonus();
-    if(many > hasBonus) {
-        ctr->setBonus(0);
-        ctr->updateAvail(-(many - hasBonus));
-        ctr->updateCounter(many);
-    } else if(many == hasBonus) {
-        ctr->setBonus(0);
-        ctr->updateCounter(many);
-    } else {
-        ctr->updateAvail(-many);
-        ctr->updateCounter(many);
+    Counter *ctr = nullptr;
+    if(parent()) {
+      ctr = parent()->findChild<Counter*>("counter");
+      if(!ctr) {
+        ctr = new Counter(this);
+      }
     }
-    delete ctr;
+    auto needed = maker->pageToCreate();
+    auto sisaBonus = ctr->bonus();
+    auto avail = ctr->avail();
+    sisaBonus -= needed;
+    if(sisaBonus > 0) {
+      ctr->setBonus(sisaBonus);
+    } else {
+      ctr->setBonus(0);
+      if(sisaBonus)
+        ctr->updateAvail(sisaBonus);
+    }
+    ctr->updateCounter(needed);
     emit accepted();
     accept();
 }

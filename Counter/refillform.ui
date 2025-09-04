@@ -62,7 +62,7 @@
     </rect>
    </property>
   </widget>
-  <widget class="QPushButton" name="pushButton_2">
+  <widget class="QPushButton" name="pushButton2">
    <property name="geometry">
     <rect>
      <x>380</x>
@@ -75,7 +75,7 @@
     <string>Refill</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="pushButton_3">
+  <widget class="QPushButton" name="pushButton3">
    <property name="geometry">
     <rect>
      <x>290</x>

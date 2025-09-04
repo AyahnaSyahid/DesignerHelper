@@ -35,7 +35,7 @@ void RefillForm::on_pushButton_clicked()
 }
 
 
-void RefillForm::on_pushButton_2_clicked()
+void RefillForm::on_pushButton2_clicked()
 {
     if(ui->plainTextEdit->toPlainText().isEmpty()) {
         QMessageBox::warning(this, "Peringatan", "Silahkan pilih file token");
@@ -45,7 +45,7 @@ void RefillForm::on_pushButton_2_clicked()
 }
 
 
-void RefillForm::on_pushButton_3_clicked()
+void RefillForm::on_pushButton3_clicked()
 {
     RefillRequest rr;
     rr.exec();

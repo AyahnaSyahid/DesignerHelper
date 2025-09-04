@@ -5,7 +5,6 @@
 #include "polaroidmakerns.h"
 #include "polaroidmaker.h"
 #include "sizetemplatemodel.h"
-#include "counter.h"
 #include <QSortFilterProxyModel>
 #include <QWidget>
 #include <QMap>
@@ -13,6 +12,7 @@ namespace Ui {
 class PolaroidMakerWidget;
 }
 
+class Counter;
 class POLAROIDMAKER_EXPORT PolaroidMakerWidget : public QWidget
 {
     Q_OBJECT
@@ -57,14 +57,16 @@ private slots:
     void on_eGamma_clicked();
     void on_doButton_clicked();
     void refillFailedHandler(const QString &msg);
-    void refillSuccessHandler();
+    void refillSuccessHandler(int av, int bn);
     void lihatCounter();
+    void openRefillDialog();
 
 private:
     Ui::PolaroidMakerWidget *ui;
     QColor cropColor;
     QColor bgColor;
     QColor markColor;
+    Counter *ctr;
 
 signals:
     void ukuranKertasChanged();

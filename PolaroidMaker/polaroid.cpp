@@ -85,8 +85,14 @@ QImage Polaroid::getImage()
     // qDebug() << "Polaroid::getImage Called";
     reader.setAutoTransform(true);
     QImage m = reader.read();
-    if(m.isNull())
-        return m;
+    if(m.isNull()) {
+      QImage ret(256, 256, QImage::Format_ARGB32);
+      ret.fill(Qt::transparent);
+    }
+    // max image is 3200px
+    if(m.height() > 3200 || m.width() > 3200 ) {
+      m = m.scaled(QSize(3200, 3200), Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    }
     if(r_gamma == 1.0) {
         return m;
     }
@@ -97,11 +103,11 @@ QImage Polaroid::getImage()
 QIcon Polaroid::getIcon(const QSize& sz)
 {
     if(!m_image.isEmpty()) {
-        auto i = QIcon(m_image);
+        auto i = QIcon(QPixmap::fromImage(getImage()));
         return i;
     }
     QPixmap px(sz);
-    px.fill(QColor(50, 50, 50));
+    px.fill(Qt::transparent);
     return QIcon(px);
 }
 
@@ -150,11 +156,10 @@ void Polaroid::render(QPainter *ptr, const QPointF &pos)
     auto fRect = QRect(ppos, psize);
     auto cRect = contentsRect(fRect);
     ptr->fillRect(fRect, background_color);
-    QImageReader reader(m_image);
-    reader.setAutoTransform(true);
-    QImage imf = reader.read();
-    if(r_gamma != 1.0)
-        applyGamma(&imf, r_gamma);
+    QImage imf = getImage();
+    // gamma is applied
+    // if(r_gamma != 1.0)
+        // applyGamma(&imf, r_gamma);
 
     if(!imf.isNull()) {
         auto scaled = imf.scaled(cRect.size(),

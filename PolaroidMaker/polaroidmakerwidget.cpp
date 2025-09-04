@@ -6,6 +6,7 @@
 #include <QFileDialog>
 #include <QDirIterator>
 #include <QMessageBox>
+#include "counter.h"
 #include "sizetemplatedialog.h"
 #include "gammaeditordialog.h"
 #include "savedialog.h"
@@ -14,11 +15,13 @@
 PolaroidMakerNS::SizeFListsTable PolaroidMakerWidget::s_table {};
 
 PolaroidMakerWidget::PolaroidMakerWidget(QWidget *parent) :
-    QWidget(parent),
+    ui(new Ui::PolaroidMakerWidget),
     stm(new SizeTemplateModel(this, &PolaroidMakerWidget::s_table)),
-    ui(new Ui::PolaroidMakerWidget)
+    QWidget(parent),
+    ctr(new Counter(this))
 {
     ui->setupUi(this);
+    ctr->setObjectName("counter");
     cropColor = QColor(Qt::gray);
     bgColor = QColor(Qt::white);
     markColor = QColor(Qt::gray);
@@ -69,10 +72,16 @@ PolaroidMakerWidget::PolaroidMakerWidget(QWidget *parent) :
                     QSizeF(ui->pWSize->value(),
                            ui->pHSize->value()));});
     ui->progBar->setHidden(true);
-    auto act = new QAction("Counter", this);
+    auto act = new QAction("Token", this);
+    auto act2 = new QAction("Refill Form", this);
     this->addAction(act);
+    this->addAction(act2);
     act->setObjectName("actionLihatCounter");
+    act2->setObjectName("actionLihatRefillForm");
     connect(act, &QAction::triggered, this, &PolaroidMakerWidget::lihatCounter);
+    connect(act2, &QAction::triggered, this, &PolaroidMakerWidget::openRefillDialog);
+    connect(ctr, &Counter::refillSuccess, this, &PolaroidMakerWidget::refillSuccessHandler);
+    connect(ctr, &Counter::refillFailed, this, &PolaroidMakerWidget::refillFailedHandler);
     loadConfiguration();
 }
 
@@ -83,6 +92,7 @@ PolaroidMakerWidget::~PolaroidMakerWidget()
     delete polModel;
     delete proxUK;
     delete proxUP;
+    delete ctr;
 }
 
 void PolaroidMakerWidget::loadUkuranKertasList()
@@ -292,28 +302,19 @@ void PolaroidMakerWidget::on_doButton_clicked()
     if(maker.pageToCreate() < 1) {
         return;
     }
-    Counter *ctr = new Counter();
-    connect(ctr, &Counter::refillSuccess, this, &PolaroidMakerWidget::refillSuccessHandler);
-    connect(ctr, &Counter::refillFailed, this, &PolaroidMakerWidget::refillFailedHandler);
-
     if(!ctr->canAcceptRequest()) {
         QMessageBox tokenHabis(this);
         tokenHabis.setInformativeText("Peringatan Token habis");
-        tokenHabis.setText("Silahkan isi token page anda agar dapat menggunakan apllikasi kembali");
+        tokenHabis.setText("Silahkan isi token anda agar dapat menggunakan aplikasi kembali");
         tokenHabis.addButton(QMessageBox::Open);
         tokenHabis.addButton(QMessageBox::Ok);
         tokenHabis.setButtonText(QMessageBox::Open, "Isi token");
         if(tokenHabis.exec() == QMessageBox::Open)
         {
-            RefillForm rf(this);
-            connect(&rf, &RefillForm::tokenReady, ctr, &Counter::refill);
-            connect(ctr, &Counter::refillSuccess, &rf, &RefillForm::accept);
-            rf.exec();
+          openRefillDialog();
         }
-        delete ctr;
         return;
     }
-    delete ctr;
     // File save dialog
     maker.setDpi(ui->outDpi->value());
     maker.setGamma(ui->aGamma->value());
@@ -325,7 +326,6 @@ void PolaroidMakerWidget::on_doButton_clicked()
     maker.setPageMarkingColor(markColor);
     maker.setPageMarkingFont(ui->fontComboBox->currentFont());
     PolaroidListModel *pm = static_cast<PolaroidListModel*>(polModel);
-    // Apply crop, bg, etc
     for(auto pth = 0; pth < maker.polaroidCount(); ++pth)
     {
         auto &pol = pm->getPolaroid(pth);
@@ -336,7 +336,7 @@ void PolaroidMakerWidget::on_doButton_clicked()
     }
 
     SaveDialog sg(this, &maker);
-    sg.setWindowTitle("Menyimpan File");
+    sg.setWindowTitle("Simpan File");
     auto acc = sg.exec();
     if(acc == sg.Accepted) {
         static_cast<PolaroidListModel*>(polModel)->clearData();
@@ -349,34 +349,22 @@ void PolaroidMakerWidget::refillFailedHandler(const QString &msg)
     QMessageBox::warning(this, "Pegisian gagal", msg);
 }
 
-void PolaroidMakerWidget::refillSuccessHandler()
+void PolaroidMakerWidget::refillSuccessHandler(int av, int bo)
 {
-    QMessageBox msg;
-    msg.setWindowTitle("Refill sukses");
-    uint avail=0, bonus=0;
-    Counter *ctr = this->findChild<Counter*>();
-    if(ctr) {
-        avail = ctr->avail();
-        bonus = ctr->bonus();
-    } else {
-        ctr = new Counter(this);
-        avail = ctr->avail();
-        bonus = ctr->bonus();
-        delete ctr;
-    }
-    msg.setText(QString("Counter saat ini :%1\nBonus counter : %2").arg(avail).arg(bonus));
-    msg.exec();
+    QString message("%1 Page, dan %2 Bonus Page berhasil ditambahkan");
+    QMessageBox::information(this, "Pengisian Token Berhasil", message.arg(QString::number(av), QString::number(bo)));
+    lihatCounter();
 }
 
+void PolaroidMakerWidget::openRefillDialog() {
+  RefillForm *rf = new RefillForm(this);
+  connect(rf, &RefillForm::tokenReady, ctr, &Counter::refill);
+  connect(ctr, &Counter::refillSuccess, rf, &RefillForm::accept);
+  rf->setAttribute(Qt::WA_DeleteOnClose);
+  rf->open();
+}
 void PolaroidMakerWidget::lihatCounter()
 {
-    Counter *ctr = this->findChild<Counter*>();
-    if(!ctr)
-    {
-        ctr = new Counter(this);
-    }
     DialogDetailCounter ddc(ctr, this);
     ddc.exec();
-    ctr->deleteLater();
 }
-

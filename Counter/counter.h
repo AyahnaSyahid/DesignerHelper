@@ -17,7 +17,6 @@ class COUNTER_EXPORT Counter : public QObject
 
 public:
     explicit Counter(QObject *parent = nullptr);
-    bool refill(const QString& data);
     const QDate& expire() const;
     qint64 avail();
     qint64 totalCounter();
@@ -27,6 +26,7 @@ public:
     const QString& errMessage();
 
 public slots:
+    bool refill(const QString& data);
     void updateAvail(int many);
     void updateCounter(int many);
     void setBonus(int many);
@@ -36,7 +36,7 @@ signals:
     void counterUpdated(int many);
     void bonusUpdated(int many);
     void refillFailed(const QString& s);
-    void refillSuccess();
+    void refillSuccess(int availAdd, int bonusAdd);
 };
 
 #endif // COUNTER_H

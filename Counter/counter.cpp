@@ -1,10 +1,9 @@
 #include "counter.h"
-#include <QApplication>
-#include <QDate>
-#include <QFile>
 #include <QStorageInfo>
-#include <QCryptographicHash>
-
+#include <QApplication>
+#include <QFile>
+#include <QDate>
+#include <QRegularExpression>
 QDate Counter::exp(2022, 9, 30);
 const int preReleaseCounter = 100;
 
@@ -16,7 +15,6 @@ Counter::Counter(QObject *parent) : QObject(parent), database(QSqlDatabase::data
     } else {
         cSettings->setValue("counter/lastAccessTime", QDateTime::currentDateTime());
     }
-    cSettings->sync();
     QFileInfo cfgPath(cSettings->fileName());
     QString databaseName =  cfgPath.absolutePath() + "/" + qAppName() + ".xmld";
     auto dbExists = QFile::exists(databaseName);
@@ -39,6 +37,7 @@ Counter::Counter(QObject *parent) : QObject(parent), database(QSqlDatabase::data
         query.exec(QString("INSERT INTO counter VALUES ('bonus', %1)").arg(exp < QDate::currentDate() ? 0 : 25));
         cSettings->setValue("counter/dataBaseCreated", QDateTime::currentDateTime());
     }
+    cSettings->sync();
 }
 
 bool Counter::refill(const QString &data)
@@ -48,6 +47,12 @@ bool Counter::refill(const QString &data)
      * (BASE64DECODED data)
      * "installTime=2022-04-16 21:33:12$$avail=1000$$bonus=25"
      */
+    QRegularExpression regex(R"--(^installTime=20[2-9]\d-(?:0[1-9]|1[0-2])-(?:0[1-9]|[1-2]\d|3[0-1]) (?:0[0-9]|1[0-9]|2[0-3])(?::(?:0[1-9]|[1-5]\d))+\$\$avail=\d+\$\$bonus=\d+)--");
+    auto regmatch = regex.match(ba);
+    if(!regmatch.hasMatch()) {
+      emit refillFailed("Data Korupt");
+      return false;
+    }
     QStringList pairs = ba.split("$$");
     if(pairs.count() < 3){
         emit refillFailed("Data Korupt");
@@ -74,7 +79,7 @@ bool Counter::refill(const QString &data)
             database.open();
         QSqlQuery q;
         q.exec(QString("UPDATE counter SET val = '%1' WHERE key ='installTime'").arg(QDateTime::currentDateTime().toString("yyyy-MM-dd HH:mm:ss")));
-        emit refillSuccess();
+        emit refillSuccess(availT.toInt(), bonusT.toInt());
     }
     else
         emit refillFailed("Kegagalan tidak di ketahui");

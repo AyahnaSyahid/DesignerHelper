@@ -1,10 +1,12 @@
 #include <QApplication>
 #include <QMainWindow>
+#include <QSettings>
 #include <QMenuBar>
-#include <QMenu>
 #include <QAction>
+#include <QTimer>
+#include <QMenu>
 
-#define APP_VERSION 1.5
+#define APP_VERSION 1.6
 
 #include "polaroidmakerwidget.h"
 
