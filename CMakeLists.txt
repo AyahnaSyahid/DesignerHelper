@@ -2,7 +2,7 @@ CMAKE_MINIMUM_REQUIRED(VERSION 3.20)
 
 project(DesignerHelper)
 
-SET(CMAKE_BUILD_TYPE Debug)
+SET(CMAKE_BUILD_TYPE Release)
 
 SET(CMAKE_AUTOMOC ON)
 SET(CMAKE_AUTORCC ON)
@@ -24,6 +24,6 @@ target_compile_definitions(PolaroidMaker PRIVATE POLAROIDMAKER_LIBRARY)
 target_link_libraries(PolaroidMaker PUBLIC Qt5::Widgets Counter)
 
 add_subdirectory(PolaroidUi)
-add_dependencies(PolaroidUi PolaroidMaker)
+add_dependencies(PolaroidUi PolaroidMaker Counter)
 target_include_directories(PolaroidUi PRIVATE PolaroidMaker Counter)
 target_link_libraries(PolaroidUi PRIVATE Qt5::Widgets PolaroidMaker Counter)
