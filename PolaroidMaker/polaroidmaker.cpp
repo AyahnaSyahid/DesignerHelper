@@ -160,19 +160,18 @@ bool PolaroidMaker::writeToFile(const QString &fname)
     while(itr != p_pols.end()) {
         for(int r=0; r < ly.second; ++r) {
             for(int c=0; c < ly.first; ++c) {
-                if(itr != p_pols.end()) {
-                    nextPos.setX((p_polsize.width() * c) + fpost.x());
-                    nextPos.setY((p_polsize.height() * r) + fpost.y());
-                    (*itr).setScaleMode(Polaroid::Expanded);
-                    // (*itr).setScaleMode(Polaroid::Blured);
-                    (*itr).setSize(p_polsize);
-                    (*itr).render(&ptr, nextPos);
-                    progressUpdate(curPage, ++curPol);
-                    updater->emitPageUpdate(curPage);
-                    updater->emitPolaroidUpdate(curPol);
-                } else {
+                if(itr == p_pols.end()) {
                     break;
                 }
+                nextPos.setX((p_polsize.width() * c) + fpost.x());
+                nextPos.setY((p_polsize.height() * r) + fpost.y());
+                (*itr).setScaleMode(Polaroid::Expanded);
+                // (*itr).setScaleMode(Polaroid::Blured);
+                (*itr).setSize(p_polsize);
+                (*itr).render(&ptr, nextPos);
+                progressUpdate(curPage, ++curPol);
+                updater->emitPageUpdate(curPage);
+                updater->emitPolaroidUpdate(curPol);            
                 ++itr;
             }
         }
