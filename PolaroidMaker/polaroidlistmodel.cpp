@@ -5,7 +5,7 @@
 PolaroidListModel::PolaroidListModel(QObject *parent, QList<Polaroid> *pl)
     : QAbstractListModel(parent), pols(pl)
 {
-    QPixmapCache::setCacheLimit(QPixmapCache::cacheLimit()*5);
+    // QPixmapCache::setCacheLimit(QPixmapCache::cacheLimit()*5);
 }
 
 QVariant PolaroidListModel::headerData(int section, Qt::Orientation orientation, int role) const
@@ -37,7 +37,7 @@ QVariant PolaroidListModel::data(const QModelIndex &index, int role) const
     if (!index.isValid())
         return QVariant();
 
-    auto &cpol = (*pols)[index.row()];
+    auto cpol = pols->at(index.row());
     
     switch (role) {
     case Qt::DisplayRole:
@@ -45,14 +45,7 @@ QVariant PolaroidListModel::data(const QModelIndex &index, int role) const
     case Qt::EditRole:
         return cpol.imageFile();
     case Qt::DecorationRole:
-        QString cKey("plm@%1");
-        cKey = cKey.arg(cpol.imageFile());
-        QPixmap cached;
-        if(QPixmapCache::find(cKey, &cached)) return QIcon(cached);
-        QImage img =  cpol.getImage().scaled(128, 128, Qt::KeepAspectRatio);
-        auto pxm = QPixmap::fromImage(img);
-        QPixmapCache::insert(cKey, pxm);
-        return QIcon(pxm);
+        return QIcon(cpol.getPixmap());
     }
     return QVariant();
 }
