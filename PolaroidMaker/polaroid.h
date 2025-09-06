@@ -23,24 +23,20 @@ private:
   QString m_image;
   QSizeF m_size;
   QPointF m_position;
-
   // cropmarks
   bool e_cropmark;
   qreal cropmark_size;
   qreal cropmark_weight;
   QColor cropmark_color;
-
   // background
   QColor background_color;
-
   // Scaling
   ScaleMode m_scale;
-
   // GammaAddjustment
   float r_gamma = 1.0f;
-  
-  QPixmap pixmapCache;
+
 public:
+  friend class PolaroidListModel;
   static void applyGamma(QImage *, const float& gg);
   Polaroid(const QString &image = QString(),
            const QSizeF &size  = {63.6, 95},
@@ -57,7 +53,7 @@ public:
   inline QString imageName() noexcept {return m_image.isEmpty() ? "" : QFileInfo(m_image).baseName();}
   inline const QString imageFile() const noexcept {return m_image;}
   QIcon getIcon(const QSize &sz = QSize(128, 128));
-  const QPixmap &getPixmap() const { return pixmapCache; }
+  QPixmap getPixmap() const;
   // translator
   QSize pixelSize(int dpi);
   QPoint pixelPosition(int dpi);

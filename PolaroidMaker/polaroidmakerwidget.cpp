@@ -17,8 +17,8 @@ PolaroidMakerNS::SizeFListsTable PolaroidMakerWidget::s_table {};
 PolaroidMakerWidget::PolaroidMakerWidget(QWidget *parent) :
     ui(new Ui::PolaroidMakerWidget),
     stm(new SizeTemplateModel(this, &PolaroidMakerWidget::s_table)),
-    QWidget(parent),
-    ctr(new Counter(this))
+    ctr(new Counter(this)),
+    QWidget(parent)
 {
     ui->setupUi(this);
     ctr->setObjectName("counter");
@@ -89,7 +89,6 @@ PolaroidMakerWidget::~PolaroidMakerWidget()
 {
     delete ui;
     delete stm;
-    delete polModel;
     delete proxUK;
     delete proxUP;
     delete ctr;

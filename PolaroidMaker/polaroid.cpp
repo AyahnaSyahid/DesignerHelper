@@ -8,6 +8,12 @@
 #include <QImageReader>
 #include <QPixmapCache>
 
+QImage _readImage(const QString& s) {
+  QImageReader reader(s);
+  reader.setAutoTransform(true);
+  return reader.read();
+}
+
 QSize Polaroid::pixelSize(int dpi)
 {
   auto dpmm = 1/25.4 * dpi;
@@ -75,34 +81,21 @@ Polaroid::Polaroid(const QString &image,
   cropmark_color(cropmark_color),
   background_color(background_color),
   m_scale(scale),
-  pixmapCache(62, 62)
-{
-  QImageReader reader(image);
-  reader.setAutoTransform(true);
-  QImage img(256, 256, QImage::Format_ARGB32);
-  img.fill(Qt::white);
-  if(!reader.read(&img)) {
-    qDebug() << "Failed to load image" << image;
-  }
-  pixmapCache = QPixmap::fromImage(img);
-  qDebug() << "Pixmap is null :" << pixmapCache.isNull();
-}
+  r_gamma(1.0f)
+{}
 
 QImage Polaroid::getImage()
 {
-  QImageReader reader(m_image);
-  // qDebug() << "Polaroid::getImage Called";
-  reader.setAutoTransform(true);
-  QImage m = reader.read();
+  QImage m = _readImage(m_image);
   if(m.isNull()) {
     QImage ret(256, 256, QImage::Format_ARGB32);
-    ret.fill(Qt::transparent);
+    ret.fill(Qt::black);
   }
-  // max image is 3200px
-  if(m.height() > 3200 || m.width() > 3200 ) {
-    m = m.scaled(QSize(3200, 3200), Qt::KeepAspectRatio, Qt::SmoothTransformation);
+  // max image is 1200
+  if(m.height() > 1200 || m.width() > 1200 ) {
+    m = m.scaled(QSize(1200, 1200), Qt::KeepAspectRatio, Qt::SmoothTransformation);
   }
-  if(r_gamma == 1.0) {
+  if(r_gamma == 1.0f) {
     return m;
   }
   applyGamma(&m, r_gamma);
@@ -241,4 +234,16 @@ QRect Polaroid::contentsRect(const QRect& f) const
   n.setHeight(f.height() * 0.734);
   n.adjust((f.width() - n.width()) / 2, (f.height() - n.height()) / 5, (f.width() - n.width()) / 2, (f.height() - n.height()) / 5);
   return n;
+}
+
+QPixmap Polaroid::getPixmap() const {
+  QImage im = _readImage(m_image);
+  if(!im.isNull()) {
+    QPixmap fallback(100, 100);
+    fallback.fill(Qt::white);
+    return fallback;
+  }
+  if(r_gamma != 1.0f)
+    Polaroid::applyGamma(&im, r_gamma);
+  return QPixmap::fromImage(im);
 }

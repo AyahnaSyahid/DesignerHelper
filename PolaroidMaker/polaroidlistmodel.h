@@ -9,13 +9,11 @@ class PolaroidListModel : public QAbstractListModel
     Q_OBJECT
 
 public:
-    explicit PolaroidListModel(QObject *parent = nullptr, QList<Polaroid> *lpol=nullptr);
-
+    explicit PolaroidListModel(QObject *parent = nullptr);
     // Header:
     QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
     // Basic functionality:
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
-
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
 
     // Editable:
@@ -30,12 +28,13 @@ public:
 
     void insertImages(const QStringList &imgs);
     void clearData();
-
+    const QList<Polaroid> &getList() const {return pols;}
     Polaroid& getPolaroid(int n);
     void setGamma(double gm);
 
 private:
-    QList<Polaroid> *pols;
+    QList<Polaroid> pols;
+    qreal gamma;
 };
 
 #endif // POLAROIDLISTMODEL_H
