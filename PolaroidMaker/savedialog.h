@@ -1,30 +1,31 @@
 #ifndef SAVEDIALOG_H
 #define SAVEDIALOG_H
 
-#include <QDialog>
 #include <QAbstractButton>
+#include <QDialog>
+
 #include "polaroidmaker.h"
 
 namespace Ui {
 class SaveDialog;
 }
 
-class SaveDialog : public QDialog
-{
-    Q_OBJECT
-    PolaroidMaker *maker;
-public:
-    explicit SaveDialog(QWidget *parent = nullptr, PolaroidMaker *mr=nullptr);
+class SaveDialog : public QDialog {
+  Q_OBJECT
+  PolaroidMaker *maker;
 
-    ~SaveDialog();
+ public:
+  explicit SaveDialog(QWidget *parent = nullptr, PolaroidMaker *mr = nullptr);
 
-private slots:
-    void on_openSave_clicked();
-    void on_buttonBox_clicked(QAbstractButton *button);
-    void acceptAndClose();
+  ~SaveDialog();
 
-private:
-    Ui::SaveDialog *ui;
+ private slots:
+  void on_openSave_clicked();
+  void on_buttonBox_clicked(QAbstractButton *button);
+  void acceptAndClose();
+
+ private:
+  Ui::SaveDialog *ui;
 };
 
-#endif // SAVEDIALOG_H
+#endif  // SAVEDIALOG_H

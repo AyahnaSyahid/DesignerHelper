@@ -7,16 +7,15 @@ namespace Ui {
 class polaroidpropdialog;
 }
 
-class polaroidpropdialog : public QDialog
-{
-    Q_OBJECT
+class polaroidpropdialog : public QDialog {
+  Q_OBJECT
 
-public:
-    explicit polaroidpropdialog(QWidget *parent = nullptr);
-    ~polaroidpropdialog();
+ public:
+  explicit polaroidpropdialog(QWidget *parent = nullptr);
+  ~polaroidpropdialog();
 
-private:
-    Ui::polaroidpropdialog *ui;
+ private:
+  Ui::polaroidpropdialog *ui;
 };
 
-#endif // POLAROIDPROPDIALOG_H
+#endif  // POLAROIDPROPDIALOG_H

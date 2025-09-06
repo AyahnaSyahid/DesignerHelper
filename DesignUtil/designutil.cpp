@@ -1,4 +1,3 @@
 #include "designutil.h"
 
-DesignUtil::DesignUtil()
-{}
+DesignUtil::DesignUtil() {}

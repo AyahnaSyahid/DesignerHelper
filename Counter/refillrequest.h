@@ -7,20 +7,18 @@ namespace Ui {
 class RefillRequest;
 }
 
-class RefillRequest : public QDialog
-{
-    Q_OBJECT
-public:
-    explicit RefillRequest(QWidget *parent = nullptr);
-    ~RefillRequest();
+class RefillRequest : public QDialog {
+  Q_OBJECT
+ public:
+  explicit RefillRequest(QWidget *parent = nullptr);
+  ~RefillRequest();
 
-private slots:
-    void on_pushButton_clicked();
+ private slots:
+  void on_pushButton_clicked();
 
-private:
-    QString lineContent();
-    Ui::RefillRequest *ui;
+ private:
+  QString lineContent();
+  Ui::RefillRequest *ui;
 };
 
-
-#endif // REFILLREQUEST_H
+#endif  // REFILLREQUEST_H

@@ -47,7 +47,7 @@ QVariant PolaroidListModel::data(const QModelIndex &index, int role) const {
       auto key = iconCacheKey.arg(cpol.imageFile());
       QPixmap pix(160, 160);
       pix.fill(Qt::red);
-      if(QPixmapCache::find(key, &pix)) {
+      if (QPixmapCache::find(key, &pix)) {
         qDebug() << "cache found" << key;
       }
       return pix;
@@ -100,7 +100,7 @@ void PolaroidListModel::insertImages(const QStringList &imgs) {
     pl.setGamma(gamma);
     auto key = iconCacheKey.arg(s);
     QPixmap pix(160, 160);
-    if (!QPixmapCache::find(key, &pix)) { // pixmap cache belum dibuat
+    if (!QPixmapCache::find(key, &pix)) {  // pixmap cache belum dibuat
       QImage img(160, 160, QImage::Format_ARGB32);
       img.fill(Qt::transparent);
       QImageReader reader(s);
@@ -113,9 +113,9 @@ void PolaroidListModel::insertImages(const QStringList &imgs) {
         dest.moveCenter(expanded.rect().center());
         qDebug() << dest;
         expanded = expanded.copy(dest);
-        if(pl.r_gamma != 0.0f) {
+        if (pl.r_gamma != 0.0f) {
           Polaroid::applyGamma(&expanded, pl.r_gamma);
-          qDebug() << "Gamma applied";          
+          qDebug() << "Gamma applied";
         }
         expanded.save("expanded.jpg");
         pix = QPixmap::fromImage(expanded);
@@ -123,7 +123,7 @@ void PolaroidListModel::insertImages(const QStringList &imgs) {
       } else {  // image tidak terbaca
         QPixmapCache::insert(key, pix);
       }
-    } // pixmap cache sudah tersedia
+    }  // pixmap cache sudah tersedia
     pols.append(pl);
   }
   endResetModel();
@@ -135,15 +135,13 @@ void PolaroidListModel::clearData() {
   endResetModel();
 }
 
-Polaroid &PolaroidListModel::getPolaroid(int n) {
-  return pols[n];
-}
+Polaroid &PolaroidListModel::getPolaroid(int n) { return pols[n]; }
 
 void PolaroidListModel::setGamma(double gm) {
-  if(gm == gamma) return;
+  if (gm == gamma) return;
   gamma = gm;
   QStringList imageFileList;
-  for(auto p : pols) {
+  for (auto p : pols) {
     imageFileList << p.imageFile();
   }
   pols.clear();

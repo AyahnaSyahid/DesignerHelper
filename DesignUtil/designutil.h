@@ -3,10 +3,9 @@
 
 #include "DesignUtil_global.h"
 
-class DESIGNUTIL_EXPORT DesignUtil
-{
-public:
-    DesignUtil();
+class DESIGNUTIL_EXPORT DesignUtil {
+ public:
+  DesignUtil();
 };
 
-#endif // DESIGNUTIL_H
+#endif  // DESIGNUTIL_H
