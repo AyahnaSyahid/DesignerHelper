@@ -6,7 +6,10 @@
 #include <QSettings>
 #include <QTimer>
 
-#define APP_VERSION 1.6
+#define APP_VERSION 1.7
+/**
+2025-09-07 20:30
+**/
 
 #include "polaroidmakerwidget.h"
 

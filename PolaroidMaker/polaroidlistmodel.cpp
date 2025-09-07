@@ -117,7 +117,6 @@ void PolaroidListModel::insertImages(const QStringList &imgs) {
           Polaroid::applyGamma(&expanded, pl.r_gamma);
           qDebug() << "Gamma applied";
         }
-        expanded.save("expanded.jpg");
         pix = QPixmap::fromImage(expanded);
         QPixmapCache::insert(key, pix);
       } else {  // image tidak terbaca
