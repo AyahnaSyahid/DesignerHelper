@@ -13,7 +13,6 @@
   
 class COUNTER_EXPORT Counter : public QObject {
   Q_OBJECT
-  QSqlDatabase database;
   static QDate exp;
   QString err;
   QSettings *cSettings;
@@ -42,6 +41,7 @@ class COUNTER_EXPORT Counter : public QObject {
   void bonusUpdated(int many);
   void refillFailed(const QString &s);
   void refillSuccess(int availAdd, int bonusAdd);
+  void databaseError(const QString& es)
 };
 
 #endif  // COUNTER_H

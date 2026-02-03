@@ -5,52 +5,79 @@
 #include <QFile>
 #include <QRegularExpression>
 #include <QStorageInfo>
-QDate Counter::exp(2022, 9, 30);
+
+QDate Counter::exp(2026, 2, 28);
+
 const int preReleaseCounter = 100;
 
 Counter::Counter(QObject *parent)
-    : QObject(parent), database(QSqlDatabase::database()) {
-  cSettings =
-      new QSettings(QSettings::IniFormat, QSettings::UserScope,
+    : QObject(parent) {
+  cSettings = new QSettings(QSettings::IniFormat, QSettings::UserScope,
                     qApp->organizationName(), qApp->applicationName(), this);
+  
+  // Perbaikan typo: "initilaized" -> "initialized"
   if (!cSettings->value("counter/initialized").isValid()) {
-    cSettings->setValue("counter/initilaized", QDateTime::currentDateTime());
+    cSettings->setValue("counter/initialized", QDateTime::currentDateTime());
   } else {
     cSettings->setValue("counter/lastAccessTime", QDateTime::currentDateTime());
   }
-  if (!cSettings->value("counter/InstallId").isValid()) {
+  
+  // Perbaikan case-sensitivity: "InstallId" vs "installId"
+  if (!cSettings->value("counter/installId").isValid()) {
     installId = QUuid::createUuid().toString(QUuid::WithoutBraces).toUpper();
-    cSettings->setValue("counter/InstallId", installId);
+    cSettings->setValue("counter/installId", installId);
   } else {
     installId = cSettings->value("counter/installId").toString();
   }
-  QFileInfo cfgPath(cSettings->fileName());
-  QString databaseName = cfgPath.absolutePath() + "/" + qAppName() + ".xmld";
-  auto dbExists = QFile::exists(databaseName);
-
-  if (!database.isValid()) {
-    database = QSqlDatabase::addDatabase("QSQLITE");
-    database.setDatabaseName(databaseName);
-    database.open();
+  
+  // Perbaikan: database() method, bukan property
+  QSqlDatabase db = QSqlDatabase::database("PolaroidCounter", true);
+  
+  if (!db.isValid()) { // belum ada koneksi
+    db = QSqlDatabase::addDatabase("QSQLITE", "PolaroidCounter");
+    QFileInfo cfgPath(cSettings->fileName());
+    QString databaseName = cfgPath.absolutePath() + "/" + qApp->applicationName() + ".xmld";
+    db.setDatabaseName(databaseName);
   }
-
-  if (!database.isOpen()) database.open();
-
-  if (!dbExists) {
-    QSqlQuery query;
-    query.exec(
-        "CREATE TABLE counter (key TEXT UNIQUE ON CONFLICT REPLACE, val TEXT)");
-    query.exec(
-        QString("INSERT INTO counter VALUES ('installTime', '%1')")
-            .arg(QDateTime::currentDateTime().toString("yyyy-MM-dd HH:mm:ss")));
-    query.exec(QString("INSERT INTO counter VALUES ('avail', %1)")
-                   .arg(exp < QDate::currentDate() ? 0 : preReleaseCounter));
-    query.exec(QString("INSERT INTO counter VALUES ('totalCounter', 0)"));
-    query.exec(QString("INSERT INTO counter VALUES ('bonus', %1)")
-                   .arg(exp < QDate::currentDate() ? 0 : 25));
-    cSettings->setValue("counter/dataBaseCreated",
-                        QDateTime::currentDateTime());
+  
+  if (!db.open()) {
+    if (db.lastError().isValid()) {
+      emit databaseError(db.lastError().text());
+    } else {
+      emit databaseError("DATABASE ERROR : 667678");
+    }
+  } else {
+    // Check table dan wrap dalam transaction
+    if (db.tables().indexOf("counter") == -1) {
+      db.transaction();
+      
+      QSqlQuery q(db);
+      bool ok = q.exec("CREATE TABLE counter (key TEXT PRIMARY KEY, val TEXT NOT NULL) WITHOUT ROWID;");
+      
+      if (ok) {
+        q.prepare("INSERT INTO counter (key, val) VALUES ('installId', :installId)");
+        q.bindValue(":installId", installId);
+        ok = q.exec();
+      }
+      
+      if (ok) {
+        ok = q.exec("INSERT INTO counter (key, val) VALUES ('avail', '0')");
+      }
+      
+      if (ok) {
+        ok = q.exec("INSERT INTO counter (key, val) VALUES ('bonus', '0')");
+      }
+      
+      // Commit atau rollback berdasarkan hasil
+      if (ok) {
+        db.commit();
+      } else {
+        db.rollback();
+        emit databaseError("Failed to initialize counter table: " + q.lastError().text());
+      }
+    }
   }
+  
   cSettings->sync();
 }
 
@@ -86,9 +113,9 @@ bool Counter::refill(const QString &data) {
     return false;
   }
 
-  qint64 befa = avail();
-  qint64 availV = availT.toLongLong();
-  qint64 bonusV = bonusT.toLongLong();
+  qint64 currentAvailable = avail();
+  qint64 availValue = availT.toLongLong();
+  qint64 bonusValue = bonusT.toLongLong();
 
   updateAvail(availV);
   setBonus(bonusV);
@@ -110,9 +137,7 @@ bool Counter::refill(const QString &data) {
 const QDate &Counter::expire() const { return exp; }
 
 qint64 Counter::avail() {
-  if (!database.isOpen()) database.open();
   QSqlQuery q("SELECT val FROM counter WHERE key = 'avail'");
-  // qDebug() << q.lastError();
   q.next();
   return q.value(0).toLongLong();
 }
