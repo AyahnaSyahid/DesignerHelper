@@ -18,6 +18,12 @@ Counter::Counter(QObject *parent)
   } else {
     cSettings->setValue("counter/lastAccessTime", QDateTime::currentDateTime());
   }
+  if (!cSettings->value("counter/InstallId").isValid()) {
+    installId = QUuid::createUuid().toString(QUuid::WithoutBraces).toUpper();
+    cSettings->setValue("counter/InstallId", installId);
+  } else {
+    installId = cSettings->value("counter/installId").toString();
+  }
   QFileInfo cfgPath(cSettings->fileName());
   QString databaseName = cfgPath.absolutePath() + "/" + qAppName() + ".xmld";
   auto dbExists = QFile::exists(databaseName);
@@ -52,24 +58,29 @@ bool Counter::refill(const QString &data) {
   QString ba = QByteArray::fromBase64(data.toLocal8Bit());
   /*
    * (BASE64DECODED data)
-   * "installTime=2022-04-16 21:33:12$$avail=1000$$bonus=25"
+   * "installId$$installTime=2022-04-16 21:33:12$$avail=1000$$bonus=25"
    */
   QRegularExpression regex(
-      R"--(^installTime=20[2-9]\d-(?:0[1-9]|1[0-2])-(?:0[1-9]|[1-2]\d|3[0-1]) (?:0[0-9]|1[0-9]|2[0-3])(?::(?:0[1-9]|[1-5]\d))+\$\$avail=\d+\$\$bonus=\d+)--");
+      R"--(^[A-Za-z0-9^-]{36}\$\$installTime=20[2-9]\d-(?:0[1-9]|1[0-2])-(?:0[1-9]|[1-2]\d|3[0-1]) (?:0[0-9]|1[0-9]|2[0-3])(?::(?:0[1-9]|[1-5]\d))+\$\$avail=\d+\$\$bonus=\d+)--");
   auto regmatch = regex.match(ba);
   if (!regmatch.hasMatch()) {
-    emit refillFailed("Data Korupt");
+    emit refillFailed("Data Korupt 01025");
     return false;
   }
   QStringList pairs = ba.split("$$");
-  if (pairs.count() < 3) {
-    emit refillFailed("Data Korupt");
+  if (pairs.count() < 4) {
+    emit refillFailed("Data Korupt 02235");
     return false;
   }
-  QString installT, availT, bonusT;
-  installT = pairs[0].split('=')[1];
-  availT = pairs[1].split('=')[1];
-  bonusT = pairs[2].split('=')[1];
+  QString iId, installT, availT, bonusT;
+  iId = pairs[0];
+  installT = pairs[1].split('=')[1];
+  availT = pairs[2].split('=')[1];
+  bonusT = pairs[3].split('=')[1];
+  if (iId != installId) {
+    emit refillFailed("Maaf, Install ID tidak cocok");
+    return false;
+  }
   if (installT < instT()) {
     emit refillFailed("Maaf, token ini mungkin sudah dipakai sebelumnya");
     return false;
@@ -89,9 +100,11 @@ bool Counter::refill(const QString &data) {
         QString("UPDATE counter SET val = '%1' WHERE key ='installTime'")
             .arg(QDateTime::currentDateTime().toString("yyyy-MM-dd HH:mm:ss")));
     emit refillSuccess(availT.toInt(), bonusT.toInt());
-  } else
+    return true;
+  } else {
     emit refillFailed("Kegagalan tidak di ketahui");
-  return true;
+  }
+  return false;
 }
 
 const QDate &Counter::expire() const { return exp; }

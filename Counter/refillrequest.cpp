@@ -10,7 +10,8 @@ RefillRequest::RefillRequest(QWidget *parent)
     : QDialog(parent), ui(new Ui::RefillRequest) {
   ui->setupUi(this);
   Counter *ct = new Counter;
-  QByteArray ba(ct->instT().toLocal8Bit());
+  QStringList params = { ct->instT(), ct->getInstallId() };
+  QByteArray ba(params.join("$$").toLocal8Bit());
   ui->plainTextEdit->setPlainText(ba.toBase64(ba.OmitTrailingEquals));
   ct->deleteLater();
 }

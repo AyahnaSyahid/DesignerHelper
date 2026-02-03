@@ -7,12 +7,17 @@
 
 #include "Counter_global.h"
 
+#ifdef _WIN32
+  #include <windows.h>
+#endif
+  
 class COUNTER_EXPORT Counter : public QObject {
   Q_OBJECT
   QSqlDatabase database;
   static QDate exp;
   QString err;
   QSettings *cSettings;
+  QString installId;
 
  public:
   explicit Counter(QObject *parent = nullptr);
@@ -23,6 +28,7 @@ class COUNTER_EXPORT Counter : public QObject {
   QString instT();
   bool canAcceptRequest();
   const QString &errMessage();
+  inline const QString &getInstallId() const { return installId; }
 
  public slots:
   bool refill(const QString &data);
