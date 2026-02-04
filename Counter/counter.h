@@ -13,7 +13,10 @@
   
 class COUNTER_EXPORT Counter : public QObject {
   Q_OBJECT
+
   static QDate exp;
+  static QDate dies;
+
   QString err;
   QSettings *cSettings;
   QString installId;
@@ -31,9 +34,9 @@ class COUNTER_EXPORT Counter : public QObject {
 
  public slots:
   bool refill(const QString &data);
-  void updateAvail(int many);
   void updateCounter(int many);
   void setBonus(int many);
+  void decreaseCounter(int many);
 
  signals:
   void availUpdated(int many);
@@ -41,7 +44,7 @@ class COUNTER_EXPORT Counter : public QObject {
   void bonusUpdated(int many);
   void refillFailed(const QString &s);
   void refillSuccess(int availAdd, int bonusAdd);
-  void databaseError(const QString& es)
+  void databaseError(const QString& es);
 };
 
 #endif  // COUNTER_H

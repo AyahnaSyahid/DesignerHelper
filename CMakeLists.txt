@@ -36,3 +36,7 @@ add_subdirectory(PolaroidUi)
 add_dependencies(PolaroidUi PolaroidMaker Counter)
 target_include_directories(PolaroidUi PRIVATE PolaroidMaker Counter)
 target_link_libraries(PolaroidUi PRIVATE Qt5::Widgets PolaroidMaker Counter)
+
+if (CMAKE_BUILD_TYPE MATCHES RelMinSize )
+    add_definitions(-DQT_NO_DEBUG_OUTPUT)
+endif()

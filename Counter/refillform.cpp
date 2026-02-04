@@ -18,7 +18,7 @@ void RefillForm::on_pushButton_clicked() {
   auto ch = QFileDialog::getOpenFileName(nullptr, "Isi Token");
   if (ch.isEmpty()) {
     QMessageBox::warning(this, "Gagal", "Operasi dibatalkan");
-    this->close();
+    // this->close();
     return;
   }
   ui->lineEdit->setText(ch);

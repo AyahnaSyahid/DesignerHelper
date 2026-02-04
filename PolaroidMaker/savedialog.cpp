@@ -83,23 +83,16 @@ void SaveDialog::acceptAndClose() {
   }
   QMessageBox::information(this, "Info", "Export berhasil");
   Counter *ctr = nullptr;
+  bool ctr_created = false;
   if (parent()) {
     ctr = parent()->findChild<Counter *>("counter");
     if (!ctr) {
       ctr = new Counter(this);
+      ctr_created = true;
     }
   }
   auto needed = maker->pageToCreate();
-  auto sisaBonus = ctr->bonus();
-  auto avail = ctr->avail();
-  sisaBonus -= needed;
-  if (sisaBonus > 0) {
-    ctr->setBonus(sisaBonus);
-  } else {
-    ctr->setBonus(0);
-    if (sisaBonus) ctr->updateAvail(sisaBonus);
-  }
-  ctr->updateCounter(needed);
+  ctr->decreaseCounter(needed);
   emit accepted();
   accept();
 }
