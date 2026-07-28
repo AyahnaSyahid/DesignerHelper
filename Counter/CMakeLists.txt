@@ -13,8 +13,10 @@ add_library(Counter SHARED counter.h
                            )
 target_compile_definitions(Counter PRIVATE COUNTER_LIBRARY)
 target_link_libraries(Counter PUBLIC Qt5::Widgets Qt5::Sql)
-set_target_properties(Counter PROPERTIES OUTPUT_NAME "Counter"
-                      PREFIX "")
+set_target_properties(Counter PROPERTIES 
+        OUTPUT_NAME "Counter"
+        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
+        PREFIX "")
 
 install(TARGETS Counter 
         RUNTIME DESTINATION bin)
