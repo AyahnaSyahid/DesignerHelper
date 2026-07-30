@@ -443,6 +443,8 @@ void PolaroidMakerWidget::handleDroppedUrls(const QList<QUrl> &urls) {
   // Masukkan semua file yang ditemukan ke dalam Model
   if (!filesToAdd.isEmpty()) {
     PolaroidListModel *plm = static_cast<PolaroidListModel *>(polModel);
+    qApp->setOverrideCursor(QCursor(Qt::WaitCursor));
     plm->insertImages(filesToAdd);
+    qApp->restoreOverrideCursor();
   }
 }

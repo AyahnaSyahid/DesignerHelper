@@ -96,6 +96,7 @@ bool PolaroidListModel::removeRows(int r, int count,
 void PolaroidListModel::insertImages(const QStringList &imgs) {
   beginResetModel();
   for (auto &s : imgs) {
+    qApp->processEvents();
     Polaroid pl(s);
     pl.setGamma(gamma);
     auto key = iconCacheKey.arg(s);
