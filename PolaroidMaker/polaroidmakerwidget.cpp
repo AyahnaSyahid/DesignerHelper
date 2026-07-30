@@ -56,11 +56,14 @@ PolaroidMakerWidget::PolaroidMakerWidget(QWidget *parent)
           &PolaroidMakerWidget::refreshCounter);
   connect(this, &PolaroidMakerWidget::ukuranPolaroidChanged, this,
           &PolaroidMakerWidget::refreshCounter);
-
+  this->setAcceptDrops(true);
+  ui->listView->setAcceptDrops(true);
+  ui->listView->viewport()->setAcceptDrops(true);
   ui->listView->setModel(polModel);
   ui->listView->setIconSize(QSize(128, 128));
   ui->listView->setUniformItemSizes(true);
   ui->listView->setResizeMode(ui->listView->Adjust);
+  ui->listView->viewport()->installEventFilter(this);
   ui->delPol->setEnabled(false);
   ui->propPol->setEnabled(false);
   ui->propPol->hide();
@@ -349,4 +352,68 @@ void PolaroidMakerWidget::openRefillDialog() {
 void PolaroidMakerWidget::lihatCounter() {
   DialogDetailCounter ddc(ctr, this);
   ddc.exec();
+}
+bool PolaroidMakerWidget::eventFilter(QObject *watched, QEvent *event) {
+  if (watched == ui->listView->viewport()) {
+    if (event->type() == QEvent::DragEnter || event->type() == QEvent::DragMove) {
+      QDragMoveEvent *dragEvent = static_cast<QDragMoveEvent *>(event);
+      if (dragEvent->mimeData()->hasUrls()) {
+        dragEvent->acceptProposedAction();
+        return true;
+      }
+    } else if (event->type() == QEvent::Drop) {
+      QDropEvent *dropEvent = static_cast<QDropEvent *>(event);
+      if (dropEvent->mimeData()->hasUrls()) {
+        handleDroppedUrls(dropEvent->mimeData()->urls());
+        dropEvent->acceptProposedAction();
+        return true;
+      }
+    }
+  }
+  return QWidget::eventFilter(watched, event);
+}
+void PolaroidMakerWidget::dragEnterEvent(QDragEnterEvent *event) {
+  if (event->mimeData()->hasUrls()) {
+    event->acceptProposedAction();
+  }
+}
+void PolaroidMakerWidget::dragMoveEvent(QDragMoveEvent *event) {
+  if (event->mimeData()->hasUrls()) {
+    event->acceptProposedAction();
+  }
+}
+void PolaroidMakerWidget::dropEvent(QDropEvent *event) {
+  if (event->mimeData()->hasUrls()) {
+    handleDroppedUrls(event->mimeData()->urls());
+    event->acceptProposedAction();
+  }
+}
+void PolaroidMakerWidget::handleDroppedUrls(const QList<QUrl> &urls) {
+  QStringList validExtensions = {"png", "jpg", "jpeg", "webp"};
+  QStringList filesToAdd;
+  for (const QUrl &url : urls) {
+    QString filePath = url.toLocalFile();
+    QFileInfo fileInfo(filePath);
+    // Jika yang di-drop adalah FILE GAMBAR
+    if (fileInfo.isFile()) {
+      if (validExtensions.contains(fileInfo.suffix().toLower())) {
+        filesToAdd << filePath;
+      }
+    } 
+    // Jika yang di-drop adalah FOLDER (Folder Drop)
+    else if (fileInfo.isDir()) {
+      QDirIterator dit(filePath,
+                       QStringList() << "*.png" << "*.jpeg" << "*.webp" << "*.jpg",
+                       QDir::Files | QDir::NoDotAndDotDot,
+                       QDirIterator::Subdirectories);
+      while (dit.hasNext()) {
+        filesToAdd << dit.next();
+      }
+    }
+  }
+  // Masukkan semua file yang ditemukan ke dalam Model
+  if (!filesToAdd.isEmpty()) {
+    PolaroidListModel *plm = static_cast<PolaroidListModel *>(polModel);
+    plm->insertImages(filesToAdd);
+  }
 }

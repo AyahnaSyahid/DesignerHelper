@@ -9,6 +9,12 @@
 #include "polaroidmaker.h"
 #include "polaroidmakerns.h"
 #include "sizetemplatemodel.h"
+#include <QDragEnterEvent>
+#include <QDropEvent>
+#include <QMimeData>
+#include <QUrl>
+#include <QFileInfo>
+
 namespace Ui {
 class PolaroidMakerWidget;
 }
@@ -60,13 +66,20 @@ class POLAROIDMAKER_EXPORT PolaroidMakerWidget : public QWidget {
   void refillSuccessHandler(int av, int bn);
   void lihatCounter();
   void openRefillDialog();
-
- private:
+  
+  private:
   Ui::PolaroidMakerWidget *ui;
   QColor cropColor;
   QColor bgColor;
   QColor markColor;
   Counter *ctr;
+  void handleDroppedUrls(const QList<QUrl> &urls);
+  
+  protected:
+    bool eventFilter(QObject *watched, QEvent *event) override;    
+    void dragEnterEvent(QDragEnterEvent *event) override;
+    void dragMoveEvent(QDragMoveEvent *event) override;
+    void dropEvent(QDropEvent *event) override;
 
  signals:
   void ukuranKertasChanged();
