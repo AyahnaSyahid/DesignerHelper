@@ -36,6 +36,8 @@ class SizeTemplateModel : public QAbstractTableModel {
 
   void setDataFile(const QString &df);
 
+  bool insertData(const QString& tipe, const QString& name, qreal width, qreal height);
+
  private:
   QString m_dataFile;
   PolaroidMakerNS::SizeFListsTable *s_table;

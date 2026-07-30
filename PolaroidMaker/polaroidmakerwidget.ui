@@ -46,15 +46,18 @@
          </widget>
         </item>
         <item row="1" column="2">
-         <widget class="QPushButton" name="pushButton">
+         <widget class="QPushButton" name="newSizeButton">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Maximum" vsizetype="Minimum">
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
           </property>
+          <property name="toolTip">
+           <string>Buat ukuran baru</string>
+          </property>
           <property name="text">
-           <string>Buat Baru</string>
+           <string>Uk. Baru</string>
           </property>
          </widget>
         </item>
@@ -685,7 +688,7 @@
  <tabstops>
   <tabstop>kTemplate</tabstop>
   <tabstop>pTemplate</tabstop>
-  <tabstop>pushButton</tabstop>
+  <tabstop>newSizeButton</tabstop>
   <tabstop>kWSize</tabstop>
   <tabstop>kHSize</tabstop>
   <tabstop>pWSize</tabstop>

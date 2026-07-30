@@ -51,7 +51,7 @@ class POLAROIDMAKER_EXPORT PolaroidMakerWidget : public QWidget {
   void on_colTButton_clicked();
   void on_colCButton_clicked();
   void on_colBButton_clicked();
-  void on_pushButton_clicked();
+  void on_newSizeButton_clicked();
   void on_delPol_clicked();
   void on_restPol_clicked();
   void on_addFold_clicked();
@@ -66,8 +66,9 @@ class POLAROIDMAKER_EXPORT PolaroidMakerWidget : public QWidget {
   void refillSuccessHandler(int av, int bn);
   void lihatCounter();
   void openRefillDialog();
-  
-  private:
+  void onAddSizeTemplate();
+
+ private:
   Ui::PolaroidMakerWidget *ui;
   QColor cropColor;
   QColor bgColor;

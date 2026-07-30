@@ -130,3 +130,11 @@ void SizeTemplateModel::setDataFile(const QString &df) {
     if (s_table) s_table->loadFromFile(df);
   endResetModel();
 }
+
+bool SizeTemplateModel::insertData(const QString& tipe, const QString& name,
+                                   qreal width, qreal height) {
+  beginInsertRows(QModelIndex(), 0, 1);
+  s_table->append(PolaroidMakerNS::SizeFLists(tipe, name, width, height));
+  endInsertRows();
+  return true;
+}

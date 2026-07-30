@@ -29,7 +29,7 @@ struct SizeFLists {
   SizeFLists(const QString &j = "Custom", const QString &n = "Custom",
              double w = 0, double h = 0)
       : jenis(j), nama(n), ukuran(w, h) {}
-  ~SizeFLists(){};
+  ~SizeFLists() = default;
 };
 
 class SizeFListsTable : public QVector<SizeFLists> {

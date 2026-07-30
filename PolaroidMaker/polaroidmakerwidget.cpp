@@ -4,6 +4,8 @@
 #include <QDirIterator>
 #include <QFileDialog>
 #include <QMessageBox>
+#include <QMenu>
+#include <QAction>
 
 #include "counter.h"
 #include "dialogdetailcounter.h"
@@ -12,6 +14,7 @@
 #include "savedialog.h"
 #include "sizetemplatedialog.h"
 #include "ui_polaroidmakerwidget.h"
+#include "createsizedialog.h"
 
 PolaroidMakerNS::SizeFListsTable PolaroidMakerWidget::s_table{};
 
@@ -94,6 +97,14 @@ PolaroidMakerWidget::PolaroidMakerWidget(QWidget *parent)
           &PolaroidMakerWidget::refillSuccessHandler);
   connect(ctr, &Counter::refillFailed, this,
           &PolaroidMakerWidget::refillFailedHandler);
+  auto menu = new QMenu("Uk Baru");
+  auto actNewSheet = menu->addAction("Uk Kertas");
+  actNewSheet->setProperty("mode", CreateSizeDialog::Kertas);
+  auto actNewPol = menu->addAction("Uk Polaroid");
+  actNewPol->setProperty("mode", CreateSizeDialog::Polaroid);
+  ui->newSizeButton->setMenu(menu);
+  connect(actNewSheet, &QAction::triggered, this, &PolaroidMakerWidget::onAddSizeTemplate);
+  connect(actNewPol, &QAction::triggered, this, &PolaroidMakerWidget::onAddSizeTemplate);
   loadConfiguration();
 }
 
@@ -197,7 +208,7 @@ void PolaroidMakerWidget::on_colBButton_clicked() {
     }
 }
 
-void PolaroidMakerWidget::on_pushButton_clicked() {
+void PolaroidMakerWidget::on_newSizeButton_clicked() {
   SizeTemplateDialog dlg(this, stm);
   dlg.setWindowTitle("Tambahkan Ukuran");
   dlg.exec();
@@ -349,6 +360,24 @@ void PolaroidMakerWidget::openRefillDialog() {
   rf->setAttribute(Qt::WA_DeleteOnClose);
   rf->open();
 }
+void PolaroidMakerWidget::onAddSizeTemplate() {
+  auto act = qobject_cast<QAction*>(sender());
+  if(!act) return;
+  if(act->dynamicPropertyNames().contains("mode")) {
+    auto rmode = act->property("mode").value<CreateSizeDialog::Mode>();
+    CreateSizeDialog csd(rmode, this);
+    if(csd.exec() == QDialog::Accepted) {
+      auto uk = csd.getSizeData();
+      this->stm->insertData(uk.tipe, uk.name, uk.width, uk.height);
+
+      // this->proxUK->setFilterFixedString("Kertas");
+      // this->proxUP->setFilterFixedString("Polaroid");
+      this->proxUK->invalidate();
+      this->proxUP->invalidate();
+    }
+  }
+}
+
 void PolaroidMakerWidget::lihatCounter() {
   DialogDetailCounter ddc(ctr, this);
   ddc.exec();

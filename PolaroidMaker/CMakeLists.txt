@@ -1,6 +1,9 @@
 file(GLOB POLMAKERSOURCES *.cpp *.h *.ui)
 
-add_library(PolaroidMaker SHARED ${POLMAKERSOURCES} )
+add_library(PolaroidMaker SHARED ${POLMAKERSOURCES}
+        createsizedialog.cpp )
+
+
 
 set_target_properties(PolaroidMaker PROPERTIES 
                       OUTPUT_NAME "PolaroidMaker"
